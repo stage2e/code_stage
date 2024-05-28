@@ -1,0 +1,69 @@
+#!/bin/python3
+
+                         #############
+##########################EXPLICATION##########################
+                         #############
+
+
+""" 
+Cette fonction permet de compter le nombre de fichier qui contienne l'extensions recherché
+Elle a un côté intéractif qui permet de la rendre plus manuelle
+Cependant nous devons encore indiqué le chemin du répertoire
+"""
+
+
+
+                         ######
+##########################CODE#########################
+                         ######
+
+
+import os
+repertoire = "/home/875larz/stage"
+
+def compter_fichiers_par_extension(repertoire):
+    # demande et converti en minuscule 
+    extension_recherchee = input("Quel type d'extension recherchez-vous ? ").strip().lower()
+    # initialisation du compteur de fichier
+    nombre_fichiers = 0
+
+    # on vérifie si le répertoire existe
+    if not os.path.isdir(repertoire):
+        print(f"Le répertoire {repertoire} n'existe pas.")
+        return nombre_fichiers
+
+    # parcours des fichiers dans le répertoire
+    fichiers_trouves = []
+    for root, dirs, files in os.walk(repertoire):  #me permet de parcourir les sous repertoires du chemin où je me situe
+        for fichier in files:
+            # vérifie si l'extension est conforme à celle recherchée --> endswith compare une chaine caractere a une donné precedemment 
+            if fichier.lower().endswith(extension_recherchee):
+                #si l'extension est bonne, +1 au compteur 
+                fichiers_trouves.append(os.path.join(root, fichier))
+                nombre_fichiers += 1
+
+
+
+            ################################
+#############AFFICHAGE FICHIERS DES TROUVÉS##############
+            ################################
+
+    if fichiers_trouves:
+        print("Fichiers trouvés :")
+        for fichier in fichiers_trouves:
+            print(fichier)
+    else:
+        print(f"Aucun fichier avec l'extension {extension_recherchee} n'a été trouvé.")
+
+    return nombre_fichiers
+
+
+
+
+
+                         ###########
+##########################AFFICHAGE##########################
+                         ###########
+
+nombre_fichiers = compter_fichiers_par_extension(repertoire)
+print(f"Nombre de fichiers avec l'extension recherchée : {nombre_fichiers}")
