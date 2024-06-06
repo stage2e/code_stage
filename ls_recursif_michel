@@ -1,0 +1,73 @@
+import os
+
+def ls_recursif(chemin: str = ".", profondeur: int = 0, niveau: int = 0) -> str:
+    """
+    Fonction lsr qui renvoie l'ensemble des fichiers et répertoires présents
+    dans un répertoire et qui va le faire pour une profondeur donnée en entrée,
+    avec une représentation esthétique en forme d'arborescence.
+    chemin: str (chemin du premier répertoire, par défaut le répertoire courant)
+    profondeur: int (nombre de niveaux de profondeur à explorer, par défaut 0)
+    niveau: int (niveau actuel de profondeur, utilisé pour l'indentation, par défaut 0)
+    """
+    result = ""
+
+    # Vérifier si le chemin spécifié est un répertoire
+    if not os.path.isdir(chemin):
+        return "Le chemin spécifié n'est pas un répertoire valide."
+
+    # Afficher les fichiers dans le répertoire spécifié
+    for file in os.listdir(chemin):
+        file_path = os.path.join(chemin, file)
+        indent = "    " * niveau  # Indentation en fonction du niveau
+        result += f"{indent}- {file}\n"
+
+        # Vérifier si le fichier est un répertoire et si la profondeur maximale n'a pas été atteinte
+        if os.path.isdir(file_path) and profondeur > 0:
+            # Appel récursif pour lister les fichiers dans ce sous-répertoire
+            result += ls_recursif(file_path, profondeur - 1, niveau + 1)
+
+    # Retourner le résultat
+    return result
+
+# Exemple d'utilisation
+chemin = "TD/"
+profondeur = 6
+print(ls_recursif(chemin, profondeur))
+
+import os
+
+def ls_recursif_repertoires(chemin: str = ".", profondeur: int = 0, niveau: int = 0) -> str:
+    """
+    Fonction lsr qui renvoie l'ensemble des répertoires présents
+    dans un répertoire et qui va le faire pour une profondeur donnée en entrée,
+    avec une représentation esthétique en forme d'arborescence.
+    chemin: str (chemin du premier répertoire, par défaut le répertoire courant)
+    profondeur: int (nombre de niveaux de profondeur à explorer, par défaut 0)
+    niveau: int (niveau actuel de profondeur, utilisé pour l'indentation, par défaut 0)
+    """
+    result = ""
+
+    # Vérifier si le chemin spécifié est un répertoire
+    if not os.path.isdir(chemin):
+        return "Le chemin spécifié n'est pas un répertoire valide."
+
+    # Afficher les répertoires dans le répertoire spécifié
+    for file in os.listdir(chemin):
+        file_path = os.path.join(chemin, file)
+        # Vérifier si le fichier est un répertoire
+        if os.path.isdir(file_path):
+            indent = "    " * niveau  # Indentation en fonction du niveau
+            result += f"{indent}- {file}\n"
+
+            # Vérifier si la profondeur maximale n'a pas été atteinte
+            if profondeur > 0:
+                # Appel récursif pour lister les répertoires dans ce sous-répertoire
+                result += ls_recursif_repertoires(file_path, profondeur - 1, niveau + 1)
+
+    # Retourner le résultat
+    return result
+
+# Exemple d'utilisation
+chemin = "TD/"
+profondeur = 6
+print(ls_recursif_repertoires(chemin, profondeur))
