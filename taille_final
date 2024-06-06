@@ -1,0 +1,125 @@
+#!/bin/python3
+
+import os
+
+
+
+                         #######################
+##########################EXPLICATION DES CODES##########################
+                         #######################
+
+""" 
+
+Ces fonctions permettent de connaître la taille des repértoires. Si un repertoire est trop volumineux pour 
+son usage de base, alors il doit être controlés.  
+
+"""
+
+
+                         ###########
+##########################FONCTIONS##########################
+                         ###########
+
+
+####################
+#CONTROLE DE TAILLE#
+####################
+
+
+def taille(fichier: str) -> int:
+
+    """
+    Fonction qui renvoie la taille d'un fichier ou d'un répertoire
+    ainsi que la taille des sous-répertoires présents dans le répertoire entré.
+    :param fichier: Chemin d'un fichier ou d'un répertoire
+    :return: Entier correspondant à la taille du fichier ou du répertoire
+    """
+
+    if os.path.isfile(fichier):  # Si c'est un fichier, renvoyer sa taille
+        return os.path.getsize(fichier)
+    elif os.path.isdir(fichier):  # Si c'est un répertoire, calculer la taille de son contenu récursivement
+        total_size = 0
+        for nom in os.listdir(fichier):
+            chemin = os.path.join(fichier, nom)
+            total_size += taille(chemin)
+        return total_size
+    else:
+        return 0  # si c'est autre chose (un lien symbolique par exemple), renvoyer 0
+
+
+
+###########################
+#CONVERSION TAILLE-LISIBLE#
+###########################       
+
+def format_taille(taille: int) -> str:
+
+    """
+    Formate la taille en octets en une unité lisible (Ko, Mo, Go, etc.).
+    :param taille: Taille en octets
+    :return: Chaîne de caractères représentant la taille formatée
+    """
+
+    for unit in ['octets', 'Ko', 'Mo', 'Go', 'To']:
+        if taille < 1024.0:
+            return f"{taille:.2f} {unit}"
+        taille /= 1024.0
+    return f"{taille:.2f} Po"
+
+
+#####################################
+#VERIFICATION TAILLE DES REPERTOIRES#
+#####################################
+
+def verifier_taille_repertoires(repertoires: dict, seuil: int):
+
+    """
+    Vérifie la taille des répertoires spécifiés et imprime un message si la taille dépasse le seuil.
+    :param repertoires: Dictionnaire avec les chemins des répertoires à vérifier et leurs noms descriptifs
+    :param seuil: Seuil de taille en octets
+    """
+
+    for nom, chemin in repertoires.items():
+        taille_repertoire = taille(chemin)
+        if taille_repertoire > seuil:
+            print(f"Avertissement: Le répertoire '{nom}' ({chemin}) dépasse {format_taille(seuil)} !")
+        else:
+            print(f"Le répertoire '{nom}' ({chemin}) a une taille de {format_taille(taille_repertoire)}.")
+
+
+
+
+
+                         ###########
+##########################AFFICHAGE##########################
+                         ###########
+
+
+
+
+#############
+#UTILISATION#
+#############
+
+rep = "TD/"
+fichier = "TD/fich.txt"
+print("Taille de", fichier, ":", format_taille(taille(fichier)))
+print("Taille de", rep, ":", format_taille(taille(rep)))
+
+
+####################################
+#VERIFICATION REPERTOIRES CRITIQUES#
+####################################
+
+repertoires_a_verifier = {
+    "Bureau": "/home/875larz/Desktop",
+    "Vidéos": "/home/875larz/Videos"
+}
+
+
+#######
+#SEUIL#
+#######
+
+seuil_taille = 5 * 1024 * 1024 * 1024  # 1 Go en octets
+verifier_taille_repertoires(repertoires_a_verifier, seuil_taille)
