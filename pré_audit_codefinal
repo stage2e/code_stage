@@ -1,0 +1,185 @@
+import os
+
+
+
+
+
+                         #######################
+##########################EXPLICATION DES CODES##########################
+                         #######################
+
+"""
+
+l'ensemble de ces codes sont un groupement de tous les codes faits auparavant, 
+nous permettant ainsi de : verifier l'extension d'un fichier ainsi que sa taille.
+
+"""
+
+
+
+                         ###########
+##########################FONCTIONS##########################
+                         ###########
+
+
+####################################
+#VERIFICAION FICHIERS OU REPERTOIRE#
+####################################
+
+def verifier_type(chemin: str) -> (bool, bool):
+    """
+    Vérifie si un chemin est un fichier ou un répertoire.
+    :param chemin: Chemin à vérifier
+    :return: Tuple (est_fichier, est_repertoire)
+    """
+
+    est_fichier = os.path.isfile(chemin)
+    est_repertoire = os.path.isdir(chemin)
+    return est_fichier, est_repertoire
+
+
+
+
+
+########
+#TAILLE#
+########
+
+
+####################
+#CONTROLE DE TAILLE#
+####################
+
+def taille(fichier: str) -> int:
+    """
+    Fonction qui renvoie la taille d'un fichier ou d'un répertoire
+    ainsi que la taille des sous-répertoires présents dans le répertoire entré.
+    :param fichier: Chemin d'un fichier ou d'un répertoire
+    :return: Entier correspondant à la taille du fichier ou du répertoire
+    """
+    
+    est_fichier, est_repertoire = verifier_type(fichier)
+    
+    if est_fichier:
+        return os.path.getsize(fichier)
+    elif est_repertoire:
+        total_size = sum(taille(os.path.join(fichier, nom)) for nom in os.listdir(fichier))
+        return total_size
+    else:
+        return 0
+
+
+
+###########################
+#CONVERSION TAILLE-LISIBLE#
+########################### 
+
+def format_taille(taille: int) -> str:
+    """
+    Formate la taille en octets en une unité lisible (Ko, Mo, Go, etc.).
+    :param taille: Taille en octets
+    :return: Chaîne de caractères représentant la taille formatée
+    """
+    for unit in ['octets', 'Ko', 'Mo', 'Go', 'To']:
+        if taille < 1024.0:
+            return f"{taille:.2f} {unit}"
+        taille /= 1024.0
+    return f"{taille:.2f} Po"
+
+
+
+
+#####################################
+#VERIFICATION TAILLE DES REPERTOIRES#
+#####################################
+
+def verifier_taille_repertoire(chemin: str, seuil: int):
+    """
+    Vérifie la taille du répertoire spécifié et imprime un message si la taille dépasse le seuil.
+    :param chemin: Chemin du répertoire à vérifier
+    :param seuil: Seuil de taille en octets
+    """
+    taille_repertoire = taille(chemin)
+    if taille_repertoire > seuil:
+        print(f"Avertissement: Le répertoire '{chemin}' dépasse {format_taille(seuil)} !")
+    else:
+        print(f"Le répertoire '{chemin}' a une taille de {format_taille(taille_repertoire)}.")
+
+
+
+#####################
+#CONTROLE EXTENSIONS#
+#####################
+
+def compter_fichiers_specifiques(chemin_repertoire, extensions_recherchees):
+    """
+    Compte les fichiers avec des extensions spécifiques dans un répertoire et ses sous-répertoires.
+    :param chemin_repertoire: Chemin du répertoire à parcourir
+    :param extensions_recherchees: Liste des extensions de fichiers à rechercher
+    :return: Nombre de fichiers trouvés avec les extensions recherchées
+    """
+    compteur_fichiers = 0
+
+    for nom_fichier in os.listdir(chemin_repertoire):
+        chemin_fichier = os.path.join(chemin_repertoire, nom_fichier)
+        est_fichier, est_repertoire = verifier_type(chemin_fichier)
+
+        if est_fichier:
+            extension = os.path.splitext(nom_fichier)[1][1:]
+            if extension in extensions_recherchees:
+                compteur_fichiers += 1
+        elif est_repertoire:
+            compteur_fichiers += compter_fichiers_specifiques(chemin_fichier, extensions_recherchees)
+
+    return compteur_fichiers
+
+
+
+#############
+#LS RECURSIF#
+#############
+
+def ls_recursif(chemin: str = ".", profondeur: int = 0, niveau: int = 0) -> str:
+    """
+    Fonction lsr qui renvoie l'ensemble des fichiers et répertoires présents
+    dans un répertoire et qui va le faire pour une profondeur donnée en entrée,
+    avec une représentation esthétique en forme d'arborescence.
+    :param chemin: Chemin du premier répertoire, par défaut le répertoire courant
+    :param profondeur: Nombre de niveaux de profondeur à explorer, par défaut 0
+    :param niveau: Niveau actuel de profondeur, utilisé pour l'indentation, par défaut 0
+    :return: Chaîne de caractères représentant l'arborescence
+    """
+    est_fichier, est_repertoire = verifier_type(chemin)
+    
+    if not est_repertoire:
+        return "Le chemin spécifié n'est pas un répertoire valide."
+
+    result = ""
+    indent = "    " * niveau  # Indentation en fonction du niveau
+
+    for file in os.listdir(chemin):
+        file_path = os.path.join(chemin, file)
+        result += f"{indent}- {file}\n"
+
+        _, est_sous_repertoire = verifier_type(file_path)
+        if est_sous_repertoire and profondeur > 0:
+            result += ls_recursif(file_path, profondeur - 1, niveau + 1)
+
+    return result
+
+
+
+
+                         ###########
+##########################AFFICHAGE##########################
+                         ###########
+
+repertoires_a_verifier=str(input('Choississez le répertoire à vérifier : '))
+seuil = int(input('Indiquez un seuil qui sera donné en Go: '))
+seuil = seuil *1024*1024*1024
+verifier_taille_repertoire(repertoires_a_verifier, seuil)
+profondeur = int(input("De combien de niveaux souhaitez vous afficher l'arborescence ? : "))
+print(ls_recursif(repertoires_a_verifier, profondeur))
+extensions_a_rechercher= list(input('Choississez les extensions à rechercher : ').split(','))
+
+print(compter_fichiers_specifiques(repertoires_a_verifier, extensions_a_rechercher))
