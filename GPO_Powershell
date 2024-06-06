@@ -1,0 +1,32 @@
+#Le MDL Kaczanowski nous a donné le squelette du code, nous devions l'adapter.
+
+
+# Importer le module de stratégie de groupe
+Import-Module GroupPolicy
+
+# Définition du nom de la GPO
+$nomGPO = "2RH - Invite de commandes- USR"
+
+# Création de la GPO
+$gpo = New-GPO -Name $nomGPO -Comment "GPO pour désactiver l'invite de commandes"
+
+# Lier la GPO au domaine ou à un OU spécifique (ajuster le chemin en conséquence)
+# avec variables
+$cheminOU = "DC=ASEAR,DC=fr"  # Remplacer par le chemin de votre domaine
+New-GPLink -Name $nomGPO -Target $cheminOU
+# sans variable
+# New-GPLink -Name "2RH - Gestionnaire de taches USR" -Target "DC=example,DC=com"
+
+# Définir le chemin du registre et la valeur pour sésactiver l'accès à l'invite de commande
+$cheminRegistre = "HKCU\Software\Policies\Microsoft\Windows\System"
+$nomValeurRegistre = "DisableCMD"
+$donneesValeurRegistre = 1 #2 si on veut utiliser de façon occasionnelle
+
+# Configurer la clé de registre pour la GPO
+Set-GPRegistryValue -Name $nomGPO -Key $cheminRegistre -ValueName $nomValeurRegistre -Type DWORD -Value $donneesValeurRegistre
+
+# Optionnel : Forcer la mise à jour des stratégies de groupe sur les machines clientes
+Invoke-GPUpdate -All
+
+
+Write-Output "La GPO '$nomGPO' a été créée et configurée avec succès pour désactiver l'invite de commandes."
